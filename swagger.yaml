@@ -1,0 +1,627 @@
+swagger: '3.0.3'
+info:
+  version: '1.0.0'
+  title: Hexagonal Architecture Sample
+  description: This is an example of using Hexagonal Architecture Sample Golang Flow in a specification to describe security to your API.
+ 
+# Under securityDefinitions we declare which security schemes can be used.
+# These definitions do not affect to the operations, but can be applied
+# using the 'security' key at the global level or the operation level.
+# In this sample, we'll see how to apply the security definition globally,
+# and override it at the operation level.
+#
+# Note that for Password Flow, you must provide the Token URL.
+securityDefinitions:
+  password:
+    type: oauth2
+    # This should be updated to the Token URL of your OAuth provider.
+    tokenUrl: http://example.com/oauth/token
+    flow: password
+    scopes:
+      write: allows modifying resources
+      read: allows reading resources
+
+# Here we apply the security flow called 'password' globally to all the operations in the spec. 
+# This security scheme is defined above in the 'securityDefinitions' section.
+# Global security can be overridden an operation level as seen in the example below
+security:
+  - password:
+    - read
+    - write
+paths:
+    # In this operation we do not apply the security, because it was applied globally above.
+    # The security will be applied to this operation for that reason.
+  /ping:
+    get:
+      summary: Server heartbeat operation
+      description: This operation shows how to override the global security defined above, as we want to open it up for all users.
+      # We want to require no security schemes and override the globally define security scheme.
+      # To do that, we simply provide an empty array to the 'security' property.
+      security: [ ]
+      responses:
+        200:
+          description: OK
+  /health:
+    get:
+      summary: health check
+      description: health check
+      operationId: healthCheck
+      requestBody:
+        content:
+          text/plain:
+            example: ""
+      responses:
+        "200":
+          description: health check
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "50"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:34:04 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  details:
+                    type: object
+                    properties:
+                      sql:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: UP
+                  status:
+                    type: string
+                    example: UP
+              examples:
+                health check:
+                  value:
+                    details:
+                      sql:
+                        status: UP
+                    status: UP
+        500:
+          description: An unknown error occurred
+  /users:
+    get:
+      summary: get all users
+      description: get all users
+      operationId: getAllUsers
+      requestBody:
+        content:
+          text/plain:
+            example: ""
+      responses:
+        "200":
+          description: ""
+        "405":
+          description: get all users
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "0"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:35:42 GMT"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    dateOfBirth:
+                      type: string
+                      example: "1974-11-16T00:00:00+07:00"
+                    email:
+                      type: string
+                      example: james.howlett@gmail.com
+                    id:
+                      type: string
+                      example: wolverine
+                    phone:
+                      type: string
+                      example: "0987654321"
+                    username:
+                      type: string
+                      example: james.howlett
+                example:
+                  - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                    email: james.howlett@gmail.com
+                    id: wolverine
+                    phone: "0987654321"
+                    username: james.howlett
+              examples:
+                get all users:
+                  value:
+                    - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                      email: james.howlett@gmail.com
+                      id: wolverine
+                      phone: "0987654321"
+                      username: james.howlett
+    post:
+      summary: create an user
+      description: create an user
+      operationId: createAnUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dateOfBirth:
+                  type: string
+                  example: "1988-11-16T00:00:00+07:00"
+                email:
+                  type: string
+                  example: wolverine2.howlett@gmail.com
+                id:
+                  type: string
+                  example: wolverine2
+                phone:
+                  type: string
+                  example: "0987654322"
+                username:
+                  type: string
+                  example: wolverine2.howlett
+            example:
+              dateOfBirth: "1988-11-16T00:00:00+07:00"
+              email: wolverine2.howlett@gmail.com
+              id: wolverine2
+              phone: "0987654322"
+              username: wolverine2.howlett
+      responses:
+        "201":
+          description: create an user
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "175"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:36:12 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 1
+                  value:
+                    type: object
+                    properties:
+                      dateOfBirth:
+                        type: string
+                        example: "1988-11-16T00:00:00+07:00"
+                      email:
+                        type: string
+                        example: wolverine2.howlett@gmail.com
+                      id:
+                        type: string
+                        example: wolverine2
+                      phone:
+                        type: string
+                        example: "0987654322"
+                      username:
+                        type: string
+                        example: wolverine2.howlett
+              examples:
+                create an user:
+                  value:
+                    status: 1
+                    value:
+                      dateOfBirth: "1988-11-16T00:00:00+07:00"
+                      email: wolverine2.howlett@gmail.com
+                      id: wolverine2
+                      phone: "0987654322"
+                      username: wolverine2.howlett
+  /users/search:
+    get:
+      summary: search users
+      description: search users
+      operationId: searchUsers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: string
+            example: "1"
+        - name: limit
+          in: query
+          schema:
+            type: string
+            example: "2"
+        - name: email
+          in: query
+          schema:
+            type: string
+            example: james
+        - name: dateOfBirth.min
+          in: query
+          schema:
+            type: string
+            example: "1974-11-15T17:00:00.000Z"
+        - name: dateOfBirth.max
+          in: query
+          schema:
+            type: string
+            example: "1976-11-15T17:00:00.000Z"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            example: "phone,-id"
+      requestBody:
+        content:
+          text/plain:
+            example: ""
+      responses:
+        "200":
+          description: search users
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "164"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:35:01 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        dateOfBirth:
+                          type: string
+                          example: "1974-11-16T00:00:00+07:00"
+                        email:
+                          type: string
+                          example: james.howlett@gmail.com
+                        id:
+                          type: string
+                          example: wolverine
+                        phone:
+                          type: string
+                          example: "0987654321"
+                        username:
+                          type: string
+                          example: james.howlett
+                    example:
+                      - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                        email: james.howlett@gmail.com
+                        id: wolverine
+                        phone: "0987654321"
+                        username: james.howlett
+                  total:
+                    type: number
+                    example: 1
+              examples:
+                search users:
+                  value:
+                    list:
+                      - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                        email: james.howlett@gmail.com
+                        id: wolverine
+                        phone: "0987654321"
+                        username: james.howlett
+                    total: 1
+    post:
+      summary: search users
+      description: search users
+      operationId: searchUsers1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dateOfBirth:
+                  type: object
+                  properties:
+                    max:
+                      type: string
+                      example: "1976-11-15T17:00:00.000Z"
+                    min:
+                      type: string
+                      example: "1974-11-15T17:00:00.000Z"
+                email:
+                  type: string
+                  example: james
+                limit:
+                  type: number
+                  example: 20
+                page:
+                  type: number
+                  example: 1
+                phone:
+                  type: string
+                  example: "0987654321"
+                sort:
+                  type: string
+                  example: "phone,-id"
+                username:
+                  type: string
+                  example: james.howlett
+            example:
+              dateOfBirth:
+                max: "1976-11-15T17:00:00.000Z"
+                min: "1974-11-15T17:00:00.000Z"
+              email: james
+              limit: 20
+              page: 1
+              phone: "0987654321"
+              sort: "phone,-id"
+              username: james.howlett
+      responses:
+        "200":
+          description: search users
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "164"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:35:11 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        dateOfBirth:
+                          type: string
+                          example: "1974-11-16T00:00:00+07:00"
+                        email:
+                          type: string
+                          example: james.howlett@gmail.com
+                        id:
+                          type: string
+                          example: wolverine
+                        phone:
+                          type: string
+                          example: "0987654321"
+                        username:
+                          type: string
+                          example: james.howlett
+                    example:
+                      - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                        email: james.howlett@gmail.com
+                        id: wolverine
+                        phone: "0987654321"
+                        username: james.howlett
+                  total:
+                    type: number
+                    example: 1
+              examples:
+                search users:
+                  value:
+                    list:
+                      - dateOfBirth: "1974-11-16T00:00:00+07:00"
+                        email: james.howlett@gmail.com
+                        id: wolverine
+                        phone: "0987654321"
+                        username: james.howlett
+                    total: 1
+  /users/wolverine:
+    get:
+      summary: get an user
+      description: get an user
+      operationId: getAnUser
+      requestBody:
+        content:
+          text/plain:
+            example: ""
+      responses:
+        "200":
+          description: get an user
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "143"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:35:45 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dateOfBirth:
+                    type: string
+                    example: "1974-11-16T00:00:00+07:00"
+                  email:
+                    type: string
+                    example: james.howlett@gmail.com
+                  id:
+                    type: string
+                    example: wolverine
+                  phone:
+                    type: string
+                    example: "0987654321"
+                  username:
+                    type: string
+                    example: james.howlett
+              examples:
+                get an user:
+                  value:
+                    dateOfBirth: "1974-11-16T00:00:00+07:00"
+                    email: james.howlett@gmail.com
+                    id: wolverine
+                    phone: "0987654321"
+                    username: james.howlett
+    put:
+      summary: update an user
+      description: update an user
+      operationId: updateAnUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dateOfBirth:
+                  type: string
+                  example: "1977-11-16T00:00:00+07:00"
+                email:
+                  type: string
+                  example: wolverine2.howlett@gmail.com
+                phone:
+                  type: string
+                  example: "0987654326"
+                username:
+                  type: string
+                  example: wolverine2.howlett
+            example:
+              dateOfBirth: "1977-11-16T00:00:00+07:00"
+              email: wolverine2.howlett@gmail.com
+              phone: "0987654326"
+              username: wolverine2.howlett
+      responses:
+        "200":
+          description: update an user
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "174"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:36:38 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 1
+                  value:
+                    type: object
+                    properties:
+                      dateOfBirth:
+                        type: string
+                        example: "1977-11-16T00:00:00+07:00"
+                      email:
+                        type: string
+                        example: wolverine2.howlett@gmail.com
+                      id:
+                        type: string
+                        example: wolverine
+                      phone:
+                        type: string
+                        example: "0987654326"
+                      username:
+                        type: string
+                        example: wolverine2.howlett
+              examples:
+                update an user:
+                  value:
+                    status: 1
+                    value:
+                      dateOfBirth: "1977-11-16T00:00:00+07:00"
+                      email: wolverine2.howlett@gmail.com
+                      id: wolverine
+                      phone: "0987654326"
+                      username: wolverine2.howlett
+    delete:
+      summary: delete  an user
+      description: delete  an user
+      operationId: deleteAnUser
+      requestBody:
+        content:
+          text/plain:
+            example: ""
+      responses:
+        "200":
+          description: ""
+    patch:
+      summary: patch an user
+      description: patch an user
+      operationId: patchAnUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: james.howlett@gmail.com
+                phone:
+                  type: string
+                  example: "0987654329"
+            example:
+              email: james.howlett@gmail.com
+              phone: "0987654329"
+      responses:
+        "200":
+          description: patch an user
+          headers:
+            Content-Length:
+              schema:
+                type: string
+                example: "95"
+            Date:
+              schema:
+                type: string
+                example: "Fri, 08 Jul 2022 09:37:01 GMT"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 1
+                  value:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: james.howlett@gmail.com
+                      id:
+                        type: string
+                        example: wolverine
+                      phone:
+                        type: string
+                        example: "0987654329"
+              examples:
+                patch an user:
+                  value:
+                    status: 1
+                    value:
+                      email: james.howlett@gmail.com
+                      id: wolverine
+                      phone: "0987654329"
+tags: []
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /team-dev-ai/go-sql-hexagonal-architecture-sample/1.0.0
+schemes:
+ - https
